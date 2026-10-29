@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Jam Masjid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet" />
+    <link rel="shortcut icon" href="icon.ico.png" type="image/x-icon" />
+
+    <style>
+                          :root{
+                            --accent:#FFD700;
+                            --text:#ffffff;
+                            --font-jam: 'Roboto Condensed', sans-serif;
+                          }
+                          *{margin:0;padding:0;box-sizing:border-box;font-family:var(--font-jam)}
+                          body{ color:var(--text); height:100vh; overflow:hidden; position:relative; background:#000;}
+
+                          /* Mode ketika iqamah aktif: Sembunyikan elemen latar belakang */
+      body.mode-iqamah-aktif .slideshow,
+      body.mode-iqamah-aktif header,
+      body.mode-iqamah-aktif .clock-wrap,
+      body.mode-iqamah-aktif footer,
+      body.mode-iqamah-aktif div[id^="card-"] {
+          display: none !important;
+      }
+
+      /* Ubah area countdown bawahan menjadi kontainer jumbo full screen */
+      body.mode-iqamah-aktif .clock-wrap + div,
+      body.mode-iqamah-aktif #nextCount {
+          position: fixed !important;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: #000000 !important; /* Hitam pekat */
+          z-index: 999999 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+      }
+
+      /* Desain Teks Judul Layar Penuh */
+      body.mode-iqamah-aktif #nextName {
+          font-size: 6rem !important;
+          color: #ffffff !important;
+          margin-bottom: 30px;
+          text-transform: uppercase;
+          font-family: var(--font-jam);
+      }
+
+      /* Desain Angka Countdown Jumbo Raksasa */
+      body.mode-iqamah-aktif #nextCount {
+          font-size: 16rem !important;
+          color: #ffcc00 !important;
+          font-weight: bold;
+          font-family: var(--font-jam);
+      }
+
+      /* Sembunyikan label sisa teks bawaan yang mengganggu */
+      body.mode-iqamah-aktif #nextLabel,
+      body.mode-iqamah-aktif span {
+          display: none !important;
+      }
+
+      /* Efek Kedip Merah Kritis */
+      .teks-merah-kedip {
+          color: #ff0000 !important;
+          animation: blinker 1s linear infinite;
+      }
+      @keyframes blinker {
+          50% { opacity: 0; }
+      }
+
+
+                        .slideshow{
+                          position:absolute;
+                          top:0;left:0;
+                          width:100%;
+                          height:100%;
+                          z-index:-1
+                        }
+                        .slideshow img{
+                          position:absolute;
+                          width:100%;
+                          height:100%;
+                          object-fit:cover;
+                          opacity:0;
+                          transition:opacity 1.5s ease-in-out
+                        }
+                        .slideshow img.active{
+                          opacity:1
+                        }
+                        .overlay{
+                          background:rgba(0,0,0,0.35);
+                          height:100vh;display:flex;
+                          flex-direction:column;
+                          padding:20px;gap:10px
+                        }
+
+                          header{
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:flex-start;
+                            flex-shrink:0
+                          }
+                        .brand{
+                          display:flex;
+                          gap:20px;
+                          align-items:center
+                        }
+                        .brand img{
+                          width:120px;
+                          height:120px;
+                          object-fit:contain;
+                        }
+                        .brand h1{
+                          font-size:2.8rem;
+                          font-weight:900
+                        }
+                        .brand p{
+                          font-style:italic;
+                          color:var(--accent);
+                          font-size:1.5rem;
+                          font-weight:700
+                        }
+                        .addr
+                        {font-size:1rem;
+                          opacity:0.95;
+                          margin-top:5px;
+                          display:flex;
+                          align-items:center;
+                          gap:5px}
+
+                        .addr::before{
+                          content:"📍"
+                        }
+
+                        .clock-wrap{
+                            position:absolute!important;
+                            top: 50%!important;
+                            left: 50%!important;
+                            transform: translate(-50%, -50%) scale(2.5)!important;
+                            transform-origin: center!important;
+                            text-align:center!important;
+                            width: 100%!important;
+                            z-index:999!important;
+                        }
+                        .clock-wrap .time{
+                            font-size:80px!important;
+                            font-weight:700!important;
+                            color: #ffd700!important;
+                            text-shadow: 0 0 90px #000!important;
+                        }
+                        .clock-wrap .date, .clock-wrap .hijri{
+                            font-size:15px!important;
+                        }
+                        .top-right-tools{
+                          position:absolute;
+                          top:20px;
+                          right:20px;
+                          width:280px;
+                        }
+
+                        select{
+                          background: rgba(0,0,0,0.4); color:#fff;
+                          border:1px solid rgba(255,255,255,0.3);
+                          padding:12px;
+                          border-radius:12px;
+                          width:100%; font-size:1.2rem;
+                          font-weight:700;
+                          font-family:var(--font-jam);
+                        }
+
+                        .spacer{flex-grow:1}
+
+                        .prayer-grid{
+                          display:grid;
+                          grid-template-columns:repeat(8,1fr);
+                          gap:15px;
+                          flex-shrink:0;
+                        }
+                        .prayer-card{
+                          border-radius:16px;
+                          padding:18px 10px;
+                          text-align:center;
+                          border:4px solid transparent;
+                          transition:0.3s; min-height:120px;
+                          display:flex; flex-direction:column;
+                          justify-content:center;
+                          box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                          backdrop-filter: blur(2px);
+                        }
+                        .prayer-card:nth-child(1){ background:rgba(30, 58, 138, 0.85); }
+                        .prayer-card:nth-child(2){ background:rgba(37, 99, 235, 0.85); }
+                        .prayer-card:nth-child(3){ background:rgba(245, 158, 11, 0.85); }
+                        .prayer-card:nth-child(4){ background:rgba(16, 185, 129, 0.85); }
+                        .prayer-card:nth-child(5){ background:rgba(220, 38, 38, 0.85); }
+                        .prayer-card:nth-child(6){ background:rgba(124, 58, 237, 0.85); }
+                        .prayer-card:nth-child(7){ background:rgba(234, 88, 12, 0.85); }
+                        .prayer-card:nth-child(8){ background:rgba(31, 41, 55, 0.85); }
+
+                        .prayer-card.active{
+                          border:4px solid var(--accent);
+                          transform: scale(1.05);
+                          box-shadow: 0 0 20px var(--accent);
+                          filter: brightness(1.15);
+                          z-index:5;
+                        }
+
+                        .prayer-card .icon{
+                          font-size:  22px !important;
+                          margin:0 auto 12px !important;
+                          display: block !important;
+                        }
+                        .prayer-card .name{
+                          font-size: 1.5rem !important;
+                          font-weight: bold !important;
+                          display: block !important;
+                          margin-bottom: 5px !important;
+                        }
+                        .prayer-card .time{
+                          font-size:2rem !important;
+                          font-weight:700 !important;
+                          display: block !important;
+                        }
+
+                        .bottom{
+                          display:grid;
+                          grid-template-columns:220px 1fr;
+                          gap:15px;align-items:center;
+                          flex-shrink:0;
+                        }
+
+                        .next-prayer{
+                          background:rgba(0,0,0,0.6);
+                          padding:15px;
+                          border-radius:16px;
+                          border:2px solid var(--accent);
+                        }
+
+                        .next-prayer.label{
+                          font-size:0.9rem;
+                          font-weight:700
+                        }
+                        .next-prayer.name{
+                          font-size:1.2rem;
+                          font-weight:900;
+                          margin-top:2px
+                        }
+
+                        .next-prayer.count{
+                          font-size:2rem;
+                          font-weight:700;
+                          letter-spacing:1px;
+                          margin:4px 0;
+                          color:var(--accent);
+                        }
+                        .marquee-wrapper{
+                          background:rgba(0,0,0,0.6);
+                          padding:12px;
+                          border-radius:16px;
+                          border:2px solid var(--accent);
+                          overflow:hidden;white-space:nowrap
+                        }
+                        .marquee-text{
+                          display:inline-block;
+                          padding-left:100%;
+                          animation: marquee 45s linear infinite;
+                          font-size:1.5rem;font-weight:700
+                        }
+                        .marquee-text span{
+                          display:block;
+                          color:var(--accent);
+                          margin-top:4px;
+                        }
+
+                        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); }
+                        footer{background:rgba(0,0,0,0.6);padding:6px 15px;font-size:0.85rem;margin-top:auto;min-height:32px;font-weight:700}
+    </style>
+  </head>
+  <body>
+    <div class="slideshow"><img src="bg1.jpg" class="active" /><img src="bg2.jpg" /><img src="bg3.jpg" /><img src="bg4.jpg" /></div>
+    <div class="overlay">
+      <header>
+        <div class="brand">
+          <img src="logo.png" />
+          <div>
+            <h1>MASJID BAITUL RAHMAN</h1>
+            <p>Membangun Kebersamaan Dalam Iman</p>
+            <div class="addr">Jl. Gatot Subroto No. 517 Bandung</div>
+          </div>
+        </div>
+        <div class="top-right-tools">
+          <select id="city">
+            <option>Kota Bandung</option>
+            <option>Kabupaten Bandung</option>
+          </select>
+        </div>
+      </header>
+      <div class="clock-wrap">
+        <div class="time" id="clock">00:00:00</div>
+        <div class="date" id="date">-</div>
+        <div class="hijri" id="hijri">-</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="prayer-grid" id="prayerGrid"></div>
+      <div class="bottom">
+        <div class="next-prayer">
+          <div class="label">WAKTU BERIKUTNYA</div>
+          <div class="name" id="nextName">-</div>
+          <div class="count" id="nextCount">00:00:00</div>
+          <div>Menuju waktu <span id="nextLabel">-</span></div>
+        </div>
+        <div class="marquee-wrapper">
+          <div class="marquee-text">
+            Sesungguhnya shalat itu adalah kewajiban yang ditentukan waktunya atas orang-orang yang beriman | Mari Tebar Kebaikan dengan ZIS (Zakat, Infak, Sedekah) | Mohon Matikan/Silent Nada Dering Handphone
+            <span>Jemput Donasi | Hubungi : DKM Masjid Baitul Rahman </span>
+          </div>
+        </div>
+      </div>
+      <footer></footer>
+    </div>
+    <script>
+      const prayerNames = ["IMSAK", "SUBUH", "TERBIT", "DHUHA", "DZUHUR", "ASHAR", "MAGHRIB", "ISYA"];
+      const emojiIcons = ["🌙", "🌅", "☀️", "🌤️", "☀️", "⛅", "🌇", "🌙"];
+      const prayerTimes = { IMSAK: "04:30", SUBUH: "04:40", TERBIT: "05:58", DHUHA: "06:24", DZUHUR: "11:57", ASHAR: "15:17", MAGHRIB: "17:48", ISYA: "19:00" };
+      function formatDuaAngka(angka) {
+        return String(angka).padStart(2, "0");
+      }
+      function renderPrayerCards() {
+        const grid = document.getElementById("prayerGrid");
+        grid.innerHTML = prayerNames.map((n, i) => `<div class="prayer-card" id="card-${i}"><div class="icon">${emojiIcons[i]}</div><div class="name">${n}</div><div class="time" id="t-${i}">${prayerTimes[n]}</div></div>`).join("");
+      }
+      function updateClock() {
+        const now = new Date();
+        const jam = formatDuaAngka(now.getHours());
+        const menit = formatDuaAngka(now.getMinutes());
+        const detik = formatDuaAngka(now.getSeconds());
+        document.getElementById("clock").textContent = `${jam}:${menit}:${detik}`;
+        document.getElementById("date").textContent = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+        const hijri = new Intl.DateTimeFormat("id-u-ca-islamic", { day: "numeric", month: "long", year: "numeric" }).format(now).replace(" H", "");
+        document.getElementById("hijri").textContent = hijri + " H";
+        updateCountdown();
+      }
+
+      // === TAMBAHKAN INI DI LUAR FUNGSI (Variabel Global) ===
+      const iqamahDurations = {
+        SUBUH: 12 * 60 * 1000, // 12 menit dalam milidetik
+        DZUHUR: 10 * 60 * 1000, // 10 menit
+        ASHAR: 10 * 60 * 1000, // 10 menit
+        MAGHRIB: 7 * 60 * 1000, // 7 menit
+        ISYA: 10 * 60 * 1000, // 10 menit
+      };
+      let isIqamahMode = false;
+      let iqamahEndTime = null;
+      let currentPrayerName = "";
+
+      function updateCountdown() {
+        const now = new Date();
+        let nextIdx = -1;
+        let minDiff = 1e9;
+
+        // 1. Logika Perhitungan Waktu Salat Bawaan
+        prayerNames.forEach((n, i) => {
+          const [h, m] = prayerTimes[n].split(":").map(Number);
+          const pt = new Date();
+          pt.setHours(h, m, 0, 0);
+
+          // KUNCI UTAMA: Hanya jalankan Iqamah jika BUKAN Imsak, Terbit, Dhuha
+          const namaBesar = n.toUpperCase();
+          const bolehIqamah = namaBesar !== "IMSAK" && namaBesar !== "TERBIT" && namaBesar !== "DHUHA";
+
+          if (bolehIqamah && now >= pt && now < new Date(pt.getTime() + (iqamahDurations[namaBesar] || 10 * 60 * 1000))) {
+            const iqamahDuration = iqamahDurations[namaBesar] || 10 * 60 * 1000;
+            if (!isIqamahMode || currentPrayerName !== n) {
+              isIqamahMode = true;
+              currentPrayerName = n;
+              iqamahEndTime = new Date(pt.getTime() + iqamahDuration);
+            }
+          }
+
+          if (pt < now) pt.setDate(pt.getDate() + 1);
+
+          const diff = pt - now;
+          if (diff < minDiff) {
+            minDiff = diff;
+            nextIdx = i;
+          }
+        });
+
+        // 1.2 RESET LAMPU GLOWING (Mengatasi 2 Card Aktif Bersamaan)
+        const semuaCard = document.querySelectorAll(".prayer-card");
+        semuaCard.forEach((card, i) => {
+          if (i === nextIdx) {
+            card.classList.add("active"); // Hanya nyalakan target yang aktif saat ini
+          } else {
+            card.classList.remove("active"); // Matikan total efek menyala di card lainnya
+          }
+        });
+
+        // 2. Logika Tampilan Layar Penuh (Aman, menggunakan body langsung)
+        const bodyWrapper = document.body;
+
+        if (isIqamahMode) {
+          const iqamahDiff = iqamahEndTime - now;
+          bodyWrapper.classList.add("mode-iqamah-aktif");
+
+          if (iqamahDiff > 0) {
+            const m = String(Math.floor((iqamahDiff % 3600000) / 60000)).padStart(2, "0");
+            const s = String(Math.floor((iqamahDiff % 60000) / 1000)).padStart(2, "0");
+
+            document.getElementById("nextName").textContent = `IQAMAH ${currentPrayerName}`;
+            document.getElementById("nextCount").textContent = `${m}:${s}`;
+
+            if (iqamahDiff < 60000) {
+              document.getElementById("nextCount").classList.add("teks-merah-kedip");
+            } else {
+              document.getElementById("nextCount").classList.remove("teks-merah-kedip");
+            }
+          } else if (iqamahDiff <= 0 && iqamahDiff > -180000) {
+            document.getElementById("nextName").textContent = "SHALAT BERJAMAAH";
+            document.getElementById("nextCount").textContent = "LURUSKAN SHAF";
+            document.getElementById("nextCount").classList.add("teks-merah-kedip");
+          } else {
+            isIqamahMode = false;
+            document.getElementById("nextCount").classList.remove("teks-merah-kedip");
+            bodyWrapper.classList.remove("mode-iqamah-aktif");
+          }
+        }
+
+        // Jika tidak sedang mode Iqamah, kembalikan ke tampilan default aslinya
+        if (!isIqamahMode) {
+          bodyWrapper.classList.remove("mode-iqamah-aktif");
+          document.getElementById("nextCount").classList.remove("teks-merah-kedip");
+
+          if (nextIdx >= 0) {
+            document.getElementById("nextName").textContent = prayerNames[nextIdx];
+            document.getElementById("nextLabel").textContent = prayerNames[nextIdx];
+          }
+
+          const h = String(Math.floor(minDiff / 3600000)).padStart(2, "0");
+          const m = String(Math.floor((minDiff % 3600000) / 60000)).padStart(2, "0");
+          const s = String(Math.floor((minDiff % 60000) / 1000)).padStart(2, "0");
+          document.getElementById("nextCount").textContent = `${h}:${m}:${s}`;
+        }
+      }
+      let slideIndex = 0;
+      const slides = document.querySelectorAll(".slideshow img");
+      function showNextSlide() {
+        slides[slideIndex].classList.remove("active");
+        slideIndex = (slideIndex + 1) % slides.length;
+        slides[slideIndex].classList.add("active");
+      }
+      setInterval(showNextSlide, 10000);
+      renderPrayerCards();
+      updateClock();
+      setInterval(updateClock, 1000);
+    </script>
+  </body>
+</html>
